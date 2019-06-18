@@ -73,14 +73,95 @@ should have a load-balancing strategy or try shifting physics to the client.
 ## Finalize UI technology stack
 
 **Decision:**
+We will use the [SVG.js](https://svgjs.com/docs/2.7/) library to display the animated 
+reactor scene. 
 
 **Rationale:**
+We need to bring life to various reactor components on the screen, and
+Javascript-controlled SVG animations are a good way to do this. This library is
+simple, easy to work with, well-documented, and passes initial performance
+checks. 
+
+In a proof-of-concept, @partofthething built a simple pump animation combining
+JS-generated SVG (pump rotor) as well as Inkscape-drawn SVG (pump casing) and
+was able to change the rotor animation speed with a HTML5 range input. This was
+confirmed to work in Firefox and Chromium on Linux and Android. Here is the 
+code as a [fiddle](https://jsfiddle.net/partofthething/pw18q0hm/8/). 
+
+To stress test I got 100 rotors spinning at different speeds and they all rendered
+just fine on a 2013 laptop. I also got a little primary/secondary loop thing going
+which you can see [here](https://partofthething.com/spintest-svgjs.html)
+
+Alternatives Considered:
+
+* Velocity.js --- Was not able to figure out how to change animation speed interactively. 
+* Vanilla js --- Code quickly got too big for simple animations
+* GSAP --- License seemed slightly odd
+
+Concerns:
+* None! This library looks great.
+
+For gauges and graphs and indicators and whatnot, we should not feel constrained to SVG.js,
+and other libraries like
+
+* [ChartJS](https://github.com/nagix/chartjs-plugin-streaming),
+* [Gauge.coffee](http://bernii.github.io/gauge.js/), 
+* [Material UI](https://material-ui.com/)
+
+should all be leveraged as appropriate. 
+
 
 ## Finalize physics technology stack
 
 **Decision:**
+[Django](https://www.djangoproject.com/) will be used on the server dealing
+with physics, reactor details, and session.  
 
 **Rationale:**
+Many simple nuclear reactor simulator projects (e.g.
+[PyRK](http://pyrk.github.io/)) are easily accessible from Python, and many
+potential collaborators are familiar with the Python language. Django is the
+only web framework the team has experience with, and it doesn't seem to have
+any show-stopping characteristics with respect to the requirements. 
+
+We successfully built a simple proof-of-concept using
+[Channels](https://channels.readthedocs.io/en/latest/) to get low-latency
+full-duplex interactions between the client and the server. Interactions
+between a UI element, a trivial calculation on the server, and a UI response
+were seemingly instantaneous. The *scope* concept in that library should allow
+multiple independent simulations to run simultaneously. 
+
+Concerns:
+
+* Django is not the fastest web framework out there, and performance may become an issue, 
+  especially with many users.
+
+Alternatives considered:
+
+* Honestly, none.
+
+## Pick a 1-D transient coupled neutronics/thermal hydraulics simulator
+**Decision:**
+
+(Still in investigation). It looks like building out own 1-D transient simulator is going
+to be the best bet here. I think re-building [Sandia's 1984 code,
+TOPAZ](https://www.osti.gov/servlets/purl/5437631) in Python, looks really
+doable, and passing its results to the front end via Django Channels.
+
+**Rationale:**
+TOPAZ is 1-D and can handle 1- or 2-phase flow, compressible or incompressible, etc.
+It's relatively straightforward and well documented. It even has a series of test problems
+we can validate it against. If this ran on awesome computers in 1984, it should run fine
+for simple problems in the web browser today. 
+
+I have started coding it up in Python. We will use steam tables at first, but since it
+uses Pressure and Internal energy to look things up, any coolant can be added in later. 
+
+Concerns:
+
+* Is it too crazy to write our own transient code for this? Possibly, but it's also pretty
+  neat and fun. Let's see how it goes. 
+
 
 ## Choose license
 **Decision:**
