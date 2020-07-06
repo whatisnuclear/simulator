@@ -140,6 +140,7 @@ Alternatives considered:
 
 * Honestly, none.
 
+
 ## Pick a 1-D transient coupled neutronics/thermal hydraulics simulator
 **Decision:**
 
@@ -185,6 +186,12 @@ something) show up on a live plot. Do some experiments to see how much load such
 a system might have on a server and how responsive it is with a full control
 panel/dashboard. Try out a few simple animations (change color of a square based
 on slider value) to shake down the components of the reactor animation. 
+
+**Dummy kinetics solver**
+
+The applet at https://live.whatisnuclear.com uses Django channels to solve the actual PKE
+live and plots with javascript. Source for the physics solver is
+[here](https://github.com/partofthething/keepinpace). Source for webapp coming soon.
 
 ## Phase 2: Design and implement key systems
 
